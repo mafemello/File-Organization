@@ -10,7 +10,6 @@ typedef struct {
 	float price;
 } Product;
 
-
 int main (void) {
 
 	FILE* fp; // Pointer that indicates the file
@@ -62,10 +61,9 @@ int main (void) {
 					printf ("\nError. The file is empty. You have to add products\n\n");
 				}
 
-				while (num_products != 0) {	
-					printf ("\nLet's see what is in the file: \n");
+				printf ("\nLet's see what is in the file: \n");
+				while (fread (content->name, sizeof(char), 50, fp) != 0) {	
 					printf ("Name: \t");
-					fread (content->name, sizeof(char), 50, fp);
 					printf ("%s\n", content->name);
 					
 					printf ("Brand: \t");
@@ -79,8 +77,8 @@ int main (void) {
 					printf ("Price: \t");
 					fread (&content->price, sizeof(float), 1, fp);
 					printf ("%.4f\n", content->price);
+					printf("\n");
 
-					num_products --;
 				}
 					printf("\n");
 				break;
@@ -101,4 +99,3 @@ int main (void) {
 
 	return 0;
 }
-
