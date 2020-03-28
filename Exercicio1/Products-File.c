@@ -19,7 +19,7 @@ int main (void) {
 	int num_products = 0; // Number of products that are going to be added. Chosen by user.
 
 	// Opening the file to read and write.
-	fp = fopen ("products.txt", "w+");
+	fp = fopen ("products.bin", "wb+");
 
 	// Initializing the MENU
 	do {		
