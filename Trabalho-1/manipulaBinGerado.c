@@ -2,111 +2,23 @@
 #include<stdlib.h>
 #include<string.h>
 #include "manipulaBinGerado.h"
-#define MAX_LEN 150
-#define TOKEN ","
+#include "binHandlerAuxiliar.h"
+#include "outputAuxiliar.h"
 
-/**
- * @brief Função para uso interno do módulo escreve o cabeçalho no arquivo
- * 
- * @param h o cabeçalho já com os valores setados
- * @param fp ponteiro do arquivo binario onde será escrito o cabeçalho
- */
-void escrever_cabecalho(Header h, FILE * fp){
-    fseek(fp,0,SEEK_SET);
-    fwrite(&h.status,sizeof(char),1,fp);
-    fwrite(&h.RRNproxRegistro,sizeof(int),1,fp);
-    fwrite(&h.numeroRegistrosInseridos,sizeof(int),1,fp);
-    fwrite(&h.numeroRegistrosRemovidos,sizeof(int),1,fp);
-    fwrite(&h.numeroRegistrosAtualizados,sizeof(int),1,fp);
-    fwrite(h.lixo,sizeof(char),111,fp);
-}
 
 
 /**
- * @brief recebe um registro montado e o escreve no arquivo
+ * @brief Abre o arquivo binario em modo leitura, escrita (pode crescer a depender dos proximos trabalhos) 
+ * levando em conta o cabeçalho definido na struct Header
  * 
- * @param r rgistro a ser escrito
- * @param fp ponteiro para o arquivo a ser escrito - o registro será escrito na posição atual do ponteiro
+ * @param fp o ponteiro para o arquivo que será aberto - estará posicionado no primeiro byte após o cabeçalho de registro
+ * @param mode Indica o modo que o arquivo será aberto sendo as opções :
+ *              gerar: cria um arquivo e inicializa seu cabeçalho
+ *              ler: Tent abrir um arquivo em modo leitura e verifica seu status
+ *       
+ * @param bin_filename O nome/caminho do arquivo a ser aberto
+ * @return unsigned char um código indicando se a operação foi bem sucedida ou não
  */
-void escrever_registro(Registro r, FILE *fp){
-    fwrite(&r.cidadeMaeTamanho,sizeof(int),1,fp);
-    fwrite(&r.cidadeBebeTamanho,sizeof(int),1,fp);
-    for(int i=0;i<r.cidadeMaeTamanho;i++){
-        fwrite(&(r.cidadeMae[i]),sizeof(char),1,fp);
-    }
-    for(int i=0;i<r.cidadeBebeTamanho;i++){
-        fwrite(&(r.cidadeBebe[i]),sizeof(char),1,fp);
-    }
-    char lixo = BLANK;
-    for(int i=0;i<105-8-r.cidadeMaeTamanho-r.cidadeBebeTamanho;i++){
-        fwrite(&lixo,sizeof(char),1,fp);
-    }
-    fwrite(&r.idNascimento,sizeof(int),1,fp);
-    fwrite(&r.idadeMae,sizeof(int),1,fp);
-    fwrite(r.dataNascimento,sizeof(char),10,fp);
-    fwrite(&r.sexoBebe,sizeof(char),1,fp);
-    fwrite(r.estadoMae,sizeof(char),2,fp);
-    fwrite(r.estadoBebe,sizeof(char),2,fp);
-}
-
-/**
- * @brief le um registro do arquivo binario e o retorna pela struct registro
- * 
- * @param fp ponteiro para o arquivo binario 
- * 
- * @return Registro o registro lido
- */
-Registro ler_registro(FILE * fp){
-    Registro r;
-    fread(&r.cidadeMaeTamanho,sizeof(int),1,fp);
-    fread(&r.cidadeBebeTamanho,sizeof(int),1,fp);
-    memset(r.cidadeMae,'\0',105);
-    for(int i = 0;i<r.cidadeMaeTamanho;i++){
-        fread(&r.cidadeMae[i],sizeof(char),1,fp);
-    }
-    memset(r.cidadeBebe,'\0',105);
-    for(int i = 0;i<r.cidadeBebeTamanho;i++){
-        fread(&r.cidadeBebe[i],sizeof(char),1,fp);
-    }
-    char lixo;
-    for(int i=0;i<105-8-r.cidadeMaeTamanho-r.cidadeBebeTamanho;i++){
-        fread(&lixo,sizeof(char),1,fp);
-    }
-    fread(&r.idNascimento,sizeof(int),1,fp);
-    fread(&r.idadeMae,sizeof(int),1,fp);
-    memset(r.dataNascimento,'\0',11);
-    fread(r.dataNascimento,sizeof(char),10,fp);
-    fread(&r.sexoBebe,sizeof(char),1,fp);
-    memset(r.estadoMae,'\0',3);
-    fread(r.estadoMae,sizeof(char),2,fp);
-    memset(r.estadoBebe,'\0',3);
-    fread(r.estadoBebe,sizeof(char),2,fp);
-    return r;
-}
-
-
-/**
- * @brief Essa função le o cabeçalho do arquivo binário e o retorna por meio da struct Header
- * 
- * @param fp ponteiro do arquivo a ser lido - deve estar aberto em modo leitura - 
- *           ao fim da execução o ponteiro estará posicionado no primeiro byte após o cabeçalho
- * 
- * @return Header cabeçalho que será montado
- */
-Header ler_cabecalho(FILE * fp){
-    Header h;
-    fseek (fp, 0, SEEK_SET);
-    fread (&h.status, sizeof(char), 1, fp);
-    fread (&h.RRNproxRegistro, sizeof(int), 1 ,fp);
-    fread (&h.numeroRegistrosInseridos, sizeof(int), 1 ,fp);
-    fread (&h.numeroRegistrosRemovidos, sizeof(int), 1, fp);
-    fread (&h.numeroRegistrosAtualizados, sizeof(int), 1 ,fp);
-    fread(h.lixo,sizeof(char),111,fp);    
-
-    return h;
-}
-
-
 
 unsigned char abrir_binario(FILE ** fp,char * mode, char * bin_filename){
 
@@ -132,17 +44,6 @@ unsigned char abrir_binario(FILE ** fp,char * mode, char * bin_filename){
         // se arquivo não existir, retorna erro
         if ((*fp) == NULL) 
             return ERROR;
-
-        char status;
-        int numeroRegistroInseridos;
-        fread (&status, sizeof(char), 1, (*fp));
-        // se status == 0 -----> arquivo inconsistente
-        if (status == '0')
-            return ERROR;
-        fread(&numeroRegistroInseridos,sizeof(int),1,(*fp));
-        fread(&numeroRegistroInseridos,sizeof(int),1,(*fp));
-        if(numeroRegistroInseridos == 0)
-            printf("Registro inexistente.\n");
         return STATUS_OK;
     }
 
@@ -232,10 +133,19 @@ Registro filtrar_buffer(char * buffer){
 
 
 
+/**
+ * @brief Preenche o arquivo binário a partir do arquivo texto seguindo as especificações definidas na struct Registro
+ * 
+ * @param fp Ponteiro para o arquivo binário - o arquivo deve ter sido aberto anteriormente em modo w e o cabeçalho tem de estar preenchido estando
+ * o ponteiro posicionado na primeira posição após o header
+ * 
+ * @param csv_filename  Nome do arquivo texto que será a base para o preenchimento
+ * 
+ * @return unsigned char um código indicando se a operação foi bem sucedida ou não
+ */
 
 unsigned char preencher_binario(FILE ** fp, char * csv_filename){
     FILE * fp_csv = fopen(csv_filename , "r");
-    //Registro r;
     if((*fp) == NULL || fp_csv == NULL)
         return ERROR;
     char buffer[MAX_LEN];
@@ -247,6 +157,7 @@ unsigned char preencher_binario(FILE ** fp, char * csv_filename){
         numeroRegistrosInseridos++;
     }
     
+    //esse trecho atualiza o header de acordo com os novos registros
     Header h;
     memset(h.lixo,BLANK,111);
     h.status = STATUS_OK;
@@ -263,33 +174,26 @@ unsigned char preencher_binario(FILE ** fp, char * csv_filename){
 
 
 
-void imprimir_registro(Registro r){
-    printf("Nasceu em ");
-    if(r.cidadeBebe[0]=='\0')
-        printf("-/");
-    else
-        printf("%s/",r.cidadeBebe);
-    if(r.estadoBebe[0]=='\0')
-        printf("-,");
-    else
-        printf("%s,",r.estadoBebe);
-    printf(" em ");
-    if(r.dataNascimento[0]=='\0')
-        printf("-,");
-    else
-        printf("%s,",r.dataNascimento);
-    printf(" um bebê de sexo ");
-    if(r.sexoBebe == '0')
-        printf("IGNORADO.\n");
-    else if(r.sexoBebe == '1')
-        printf("MASCULINO.\n");
-    else
-        printf("FEMININO.\n");
-    
-}
 
-void imprime_registros(FILE **fp){
+/**
+ * @brief Essa função imprime os registro do arquivo binário seguindo o exemplho:
+ *          Nasceu em SAO CARLOS/SP, em 2020-04-18, um bebe de sexo FEMININO.
+ *          
+ * 
+ * @param fp ponteiro apontando para o arquivo binário - deve estar aberto em modo leitura - IMPORTANTE fecha o arquivo
+ */
+void imprime_arquivo_binario(FILE **fp){
     Header h = ler_cabecalho((*fp));
+    if (h.status == '0'){
+        printf("Falha no processamento do arquivo.\n");
+        fclose((*fp));
+        return;
+    }
+    if(h.numeroRegistrosInseridos == 0){
+        printf("Registro inexistente.\n");
+        fclose((*fp));
+        return;
+    }
     Registro r;
     
     

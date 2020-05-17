@@ -2,16 +2,21 @@
  *     Primeiro Trabalho Prático da Disciplina SCC0215 - Organização de Arquivos
  *     Autores:
  *              Maria Fernanda Lucio de Mello - nUsp 11320860
- *              Victor Rodrigues Russo        - nUps 11218855
+ *              Victor Rodrigues Russo        - nUsp 11218855
  *     
  */
 #include<stdio.h>
 #include "manipulaBinGerado.h"
 #include "binarioNaTela.h"
 
+
+/**
+ * @brief Essa é a main do programa, a lógica dela é intencionalmente bem simples, lendo o método e seus respectivos
+ *         parâmetros e então chamando os métodos responsáveis pelo processamento
+ * 
+ */
 int main(void){
     int funcionalidade;
-    //unsigned char status;
     char bin_filename[30], csv_filename[30];
     FILE * fp_bin;
     scanf("%d", &funcionalidade);
@@ -42,7 +47,7 @@ int main(void){
             printf("Falha no processamento do arquivo.\n");
         }
         else{
-            imprime_registros(&fp_bin);
+            imprime_arquivo_binario(&fp_bin);
         }
         break;
     }

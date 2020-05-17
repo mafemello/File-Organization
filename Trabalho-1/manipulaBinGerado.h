@@ -1,40 +1,15 @@
 /**
- * Esse módulo tem o próposito de manipular o arquivo binário gerado a partir do csv
+ * Esse módulo tem o próposito de manipular o arquivo binário gerado a partir do csv - os métodos são de alto nível de abstração
+ * sendo inspirados diretamente nas funcionalidades do trabalho
  * 
  **/
 
+
 #ifndef HANDLER_BIN_H
 #define HANDLER_BIN_H
-#define ERROR '0'
-#define STATUS_OK '1' 
-#define BLANK '$'
 
-/**
- * @brief essa estrutura é uma representação do cabeçalho do arquivo
- * 
- */
-typedef struct header_{
-    char status;
-    int RRNproxRegistro;
-    int numeroRegistrosInseridos;
-    int numeroRegistrosRemovidos;
-    int numeroRegistrosAtualizados;
-    char lixo[111];
-}Header;
+#include "constants.h"
 
-typedef struct  registro_{
-    int cidadeMaeTamanho;
-    int cidadeBebeTamanho;
-    int idNascimento;
-    int idadeMae;
-    char sexoBebe;
-    char  cidadeMae[105];
-    char  cidadeBebe[105];
-    char dataNascimento[11];
-    char estadoMae[3];
-    char estadoBebe[3];
-    
-}Registro;
 
 
 
@@ -73,6 +48,6 @@ unsigned char preencher_binario(FILE **fp, char * csv_filename);
  * 
  * @param fp ponteiro apontando para o arquivo binário - deve estar aberto em modo leitura - IMPORTANTE fecha o arquivo
  */
-void imprime_registros(FILE **fp);
+void imprime_arquivo_binario(FILE **fp);
 
 #endif
