@@ -1,5 +1,5 @@
 /**
- *     Primeiro Trabalho Prático da Disciplina SCC0215 - Organização de Arquivos
+ *     Segundo Trabalho Prático da Disciplina SCC0215 - Organização de Arquivos
  *     Autores:
  *              Maria Fernanda Lucio de Mello - nUsp 11320860
  *              Victor Rodrigues Russo        - nUsp 11218855
